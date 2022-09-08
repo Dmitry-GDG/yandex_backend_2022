@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <ctime>
 #include <sstream>
-// #include <nlohmann/json.hpp>
 
 struct Product
 {
@@ -25,6 +24,19 @@ void fillTm(std::string value, tm & data)
 	data.tm_mon = stoi(item);
 	std::getline(ss, item);
 	data.tm_year = stoi(item);
+}
+
+std::string unsignedToString99(unsigned x)
+{
+    std::string s;
+	if (x > 99)
+	{
+		while (x > 99)
+			x %= 100;
+	}
+	s += x / 10 + '0';
+	s += x % 10 + '0';
+    return s;
 }
 
 void tokenize(std::string prod_inpt, std::vector<std::string> & tmp)
@@ -98,19 +110,11 @@ void splitPairs(std::string tokenStr, std::string & key, std::string & value)
 	}
 }
 
-// // Компаратор
-// bool comp(Participants a, Participants b)
-// {
-// 	if (a.numberOfTicks == b.numberOfTicks)
-// 		return a.penalty < b.penalty;
-// 	else
-// 		return a.numberOfTicks > b.numberOfTicks;
-// }
-
-// bool comp2(Participants a, Participants b)
-// {
-// 	return a.identifier < b.identifier;
-// }
+// Компаратор
+bool comp(Product a, Product b)
+{
+	return a.id < b.id;
+}
 
 void fillData(std::string prod_inpt, std::vector<Product> & products)
 {
@@ -143,39 +147,24 @@ void fillData(std::string prod_inpt, std::vector<Product> & products)
 		}
 		products.push_back(product);
 	}
+}
 
-// 	std::vector<std::string> inpt;
-// 	int n, k;
-// 	std::string tmp;
+bool isNameContains(std::string name, std::string NAME_CONTAINS)
+{
+	std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+	std::transform(NAME_CONTAINS.begin(), NAME_CONTAINS.end(), NAME_CONTAINS.begin(), ::toupper);
+	// std::cout << "name: " << name << std::endl;
+	// std::cout << "NAME_CONTAINS: " << NAME_CONTAINS << std::endl;
+	return (name.find(NAME_CONTAINS) != std::string::npos);
+}
 
-// 	n = stoi(inpt_tmp[0]);
-// 	std::vector<std::string>::iterator iter = inpt_tmp.begin() + 1;
-// 	for (int i = 0; i < n; i++)
-// 	{
-// 		inpt.clear();
-// 		tmp = (*iter);
-// 		tokenize(tmp, delim, inpt);
-// 		Disciplines disciplines_inpt;
-// 		disciplines_inpt.disciplineName = inpt[0];
-// 		disciplines_inpt.maxQtyParticipants = stoi(inpt[1]);
-// 		disciplines.push_back(disciplines_inpt);
-// 		iter++;
-// 	}
-// 	k = stoi(*iter);
-// 	for (int i = 0; i < k; i++)
-// 	{
-// 		iter++;
-// 		inpt.clear();
-// 		tmp = (*iter);
-// 		tokenize(tmp, delim, inpt);
-// 		tokenize(tmp, delim, inpt);
-// 		Participants participants_inpt;
-// 		participants_inpt.identifier = inpt[0];
-// 		participants_inpt.disciplineName = inpt[1];
-// 		participants_inpt.numberOfTicks = stoi(inpt[2]);
-// 		participants_inpt.penalty = stoi(inpt[3]);
-// 		participants.push_back(participants_inpt);
-// 	}
+bool ifTimeValid(tm time, tm DATE_AFTER, tm DATE_BEFORE)
+{
+	int real, after, before;
+	real = time.tm_year * 10000 + time.tm_mon * 100 + time.tm_mday;
+	after = DATE_AFTER.tm_year * 10000 + DATE_AFTER.tm_mon * 100 + DATE_AFTER.tm_mday;
+	before = DATE_BEFORE.tm_year * 10000 + DATE_BEFORE.tm_mon * 100 + DATE_BEFORE.tm_mday;
+	return (real >= after && real <= before);
 }
 
 void fillFilter(std::vector<std::string> filter_inpt, unsigned & PRICE_LESS_THAN, tm & DATE_AFTER, std::string & NAME_CONTAINS, unsigned & PRICE_GREATER_THAN, tm & DATE_BEFORE)
@@ -202,16 +191,14 @@ void fillFilter(std::vector<std::string> filter_inpt, unsigned & PRICE_LESS_THAN
 
 int main (int argc, char **argv)
 {
-	int n, k;
-	std::vector<Product> products;
+	std::vector<Product> products, outp;
 	unsigned	PRICE_LESS_THAN;
 	tm			DATE_AFTER;
 	std::string	NAME_CONTAINS;
 	unsigned	PRICE_GREATER_THAN;
 	tm			DATE_BEFORE;
-	std::string	prod_inpt;
+	std::string	prod_inpt, buf, outp_json;
 	std::vector<std::string> filter_inpt;
-	std::string buf;
 
 	std::fstream fileToRead;
 	fileToRead.open("input.txt");
@@ -268,36 +255,33 @@ int main (int argc, char **argv)
 	// for (std::vector<Product>::iterator iter = products.begin(); iter < products.end(); iter++)
 	// 	std::cout << "id: " << (*iter).id << ", name: " << (*iter).name << ", price: " << (*iter).price << ", date: " << (*iter).productDate.tm_mday << "." << (*iter).productDate.tm_mon << "." << (*iter).productDate.tm_year << std::endl;
 
+	for (std::vector<Product>::iterator iter = products.begin(); iter < products.end(); iter++)
+	{
+		if (isNameContains((*iter).name, NAME_CONTAINS) && ifTimeValid((*iter).productDate, DATE_AFTER, DATE_BEFORE) && (*iter).price <= PRICE_LESS_THAN && (*iter).price >= PRICE_GREATER_THAN)
+			outp.push_back(*iter);
+	}
 
-	// for (std::vector<Disciplines>::iterator iter = disciplines.begin(); iter < disciplines.end(); iter++)
-	// 	std::cout << (*iter).disciplineName << "  " << (*iter).maxQtyParticipants << std::endl;
-	// for (std::vector<Participants>::iterator iter = participants.begin(); iter < participants.end(); iter++)
-	// 	std::cout << (*iter).identifier << "  " << (*iter).disciplineName << "  " << (*iter).numberOfTicks << "  " << (*iter).penalty << std::endl;
+	// std::cout << std::endl;
+	// for (std::vector<Product>::iterator iter = outp.begin(); iter < outp.end(); iter++)
+	// 	std::cout << "id: " << (*iter).id << ", name: " << (*iter).name << ", price: " << (*iter).price << ", date: " << (*iter).productDate.tm_mday << "." << (*iter).productDate.tm_mon << "." << (*iter).productDate.tm_year << std::endl;
 
-	// for (iterD = disciplines.begin(); iterD < disciplines.end(); iterD++)
-	// {
-	// 	participants_tmp.clear();
-	// 	for (iterP = participants.begin(); iterP < participants.end(); iterP++)
-	// 	{
-	// 		if ((*iterD).disciplineName == (*iterP).disciplineName)
-	// 			participants_tmp.push_back(*iterP);
-	// 	}
-	// 	sort (participants_tmp.begin(), participants_tmp.end(), comp);
-	// 	int j = 0;
-	// 	std::vector<Participants>::iterator iter = participants_tmp.begin();
-	// 	while (j < (*iterD).maxQtyParticipants)
-	// 	{
-	// 		j++;
-	// 		outp.push_back(*iter);
-	// 		iter++;
-	// 	}
-	// }
+	sort (outp.begin(), outp.end(), comp);
 
-	// sort (outp.begin(), outp.end(), comp2);
+	// for (std::vector<Product>::iterator iter = outp.begin(); iter < outp.end(); iter++)
+	// 	std::cout << "id: " << (*iter).id << ", name: " << (*iter).name << ", price: " << (*iter).price << ", date: " << (*iter).productDate.tm_mday << "." << (*iter).productDate.tm_mon << "." << (*iter).productDate.tm_year << std::endl;
 
-	// // std::cout << "Output:" << std::endl;
-	// for (std::vector<Participants>::iterator iter = outp.begin(); iter < outp.end(); iter++)
-	// 	std::cout << (*iter).identifier << std::endl;
+	// makeJson(outp, outp_json);
+
+	// std::cout << outp_json << std::endl;
+
+	std::cout <<  "[";
+	for (std::vector<Product>::iterator iter = outp.begin(); iter < outp.end(); iter++)
+	{
+		std::cout <<  "{\"id\": " << int((*iter).id) << ", \"name\": \"" << (*iter).name << "\", \"price\": " << (*iter).price << ", \"date\": \"" << unsignedToString99((*iter).productDate.tm_mday) << "." << unsignedToString99((*iter).productDate.tm_mon) << "." << (*iter).productDate.tm_year << "\"}";
+		if (iter + 1 != outp.end())
+			std::cout << ",";
+	}
+	std::cout << "]" << std::endl;
 
 	return 0;
 }
