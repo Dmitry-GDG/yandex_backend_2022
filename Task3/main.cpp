@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
+#include <sstream>
 
 struct Product
 {
@@ -13,8 +14,24 @@ struct Product
 	tm			productDate;
 };
 
+void fillTm(std::string value, tm & data)
+{
+	std::stringstream ss(value);
+	std::string item;
+	std::getline(ss, item, '.');
+	data.tm_mday = stoi(item);
+	std::getline(ss, item, '.');
+	data.tm_mon = stoi(item);
+	std::getline(ss, item);
+	data.tm_year = stoi(item);
+}
+
 void tokenize(std::string prod_inpt, std::vector<std::string> & tmp)
 {
+	for (std::string::iterator iter = prod_inpt.begin(); iter < prod_inpt.end(); iter++)
+	{
+		
+	}
 	
 //     size_t start;
 //     size_t end = 0;
@@ -45,7 +62,6 @@ void fillData(std::string prod_inpt, std::vector<Product> & products)
 	std::vector<std::string> tmp;
 	
 	tokenize(prod_inpt, tmp);
-	for (std::string::iterator iter = )
 
 // 	std::vector<std::string> inpt;
 // 	int n, k;
@@ -81,13 +97,35 @@ void fillData(std::string prod_inpt, std::vector<Product> & products)
 // 	}
 }
 
+void fillFilter(std::vector<std::string> filter_inpt, unsigned & PRICE_LESS_THAN, tm & DATE_AFTER, std::string & NAME_CONTAINS, unsigned & PRICE_GREATER_THAN, tm & DATE_BEFORE)
+{
+	for (std::vector<std::string>::iterator iter = filter_inpt.begin(); iter < filter_inpt.end(); iter++)
+	{
+		std::stringstream ss(*iter);
+		std::string item;
+		std::getline(ss, item, ' ');
+		std::string value;
+		std::getline(ss, value);
+		if (item == "PRICE_LESS_THAN")
+			PRICE_LESS_THAN = stoi(value);
+		if (item == "DATE_AFTER")
+			fillTm (value, DATE_AFTER);
+		if (item == "NAME_CONTAINS")
+			NAME_CONTAINS = value;
+		if (item == "PRICE_GREATER_THAN")
+			PRICE_GREATER_THAN = stoi(value);
+		if (item == "DATE_BEFORE")
+			fillTm (value, DATE_BEFORE);
+	}
+}
+
 int main (int argc, char **argv)
 {
 	int n, k;
 	std::vector<Product> products;
 	unsigned	PRICE_LESS_THAN;
 	tm			DATE_AFTER;
-	std::string	pods;
+	std::string	NAME_CONTAINS;
 	unsigned	PRICE_GREATER_THAN;
 	tm			DATE_BEFORE;
 	std::string	prod_inpt;
@@ -137,6 +175,8 @@ int main (int argc, char **argv)
 	}
 
 	fillData(prod_inpt, products);
+	fillFilter(filter_inpt, PRICE_LESS_THAN, DATE_AFTER, NAME_CONTAINS, PRICE_GREATER_THAN, DATE_BEFORE);
+
 
 	// for (std::vector<Disciplines>::iterator iter = disciplines.begin(); iter < disciplines.end(); iter++)
 	// 	std::cout << (*iter).disciplineName << "  " << (*iter).maxQtyParticipants << std::endl;
