@@ -78,7 +78,8 @@ int main (int argc, char **argv)
 	// std::cout << std::endl;
 
 	// std::cout << "output\t= ";
-	std::cout << outp << std::endl;
+	// std::cout << outp << std::endl;
+	std::cout << outp << "\n";
 
 	return 0;
 }

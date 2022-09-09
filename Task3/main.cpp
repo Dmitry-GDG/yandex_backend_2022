@@ -8,11 +8,28 @@
 
 struct Product
 {
-	unsigned	id;
+	long	id;
 	std::string	name;
-	unsigned	price;
+	long	price;
 	tm			productDate;
 };
+
+long	ft_atou(std::string str)
+{
+	long	i;
+	long	outp;
+
+	i = 0;
+	outp = 0;
+	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == 32) || str[i] == '+' || str[i] == '-')
+		i++;
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		outp = outp * 10 + str[i] - '0';
+		i++;
+	}
+	return (outp);
+}
 
 void fillTm(std::string value, tm & data)
 {
@@ -26,7 +43,7 @@ void fillTm(std::string value, tm & data)
 	data.tm_year = stoi(item);
 }
 
-std::string unsignedToString99(unsigned x)
+std::string longToString99(long x)
 {
     std::string s;
 	if (x > 99)
@@ -137,11 +154,11 @@ void fillData(std::string prod_inpt, std::vector<Product> & products)
 			splitPairs(*iter1, key, value);
 			// std::cout << "key: " << key << " value: " << value << std::endl;
 			if (key == "id")
-				product.id = stoi(value);
+				product.id = ft_atou(value);
 			if (key == "name")
 				product.name = value;
 			if (key == "price")
-				product.price = stoi(value);
+				product.price = ft_atou(value);
 			if (key == "date")
 				fillTm(value, product.productDate);
 		}
@@ -167,7 +184,7 @@ bool ifTimeValid(tm time, tm DATE_AFTER, tm DATE_BEFORE)
 	return (real >= after && real <= before);
 }
 
-void fillFilter(std::vector<std::string> filter_inpt, unsigned & PRICE_LESS_THAN, tm & DATE_AFTER, std::string & NAME_CONTAINS, unsigned & PRICE_GREATER_THAN, tm & DATE_BEFORE)
+void fillFilter(std::vector<std::string> filter_inpt, long & PRICE_LESS_THAN, tm & DATE_AFTER, std::string & NAME_CONTAINS, long & PRICE_GREATER_THAN, tm & DATE_BEFORE)
 {
 	for (std::vector<std::string>::iterator iter = filter_inpt.begin(); iter < filter_inpt.end(); iter++)
 	{
@@ -177,13 +194,13 @@ void fillFilter(std::vector<std::string> filter_inpt, unsigned & PRICE_LESS_THAN
 		std::string value;
 		std::getline(ss, value);
 		if (item == "PRICE_LESS_THAN")
-			PRICE_LESS_THAN = stoi(value);
+			PRICE_LESS_THAN = ft_atou(value);
 		if (item == "DATE_AFTER")
 			fillTm (value, DATE_AFTER);
 		if (item == "NAME_CONTAINS")
 			NAME_CONTAINS = value;
 		if (item == "PRICE_GREATER_THAN")
-			PRICE_GREATER_THAN = stoi(value);
+			PRICE_GREATER_THAN = ft_atou(value);
 		if (item == "DATE_BEFORE")
 			fillTm (value, DATE_BEFORE);
 	}
@@ -192,15 +209,15 @@ void fillFilter(std::vector<std::string> filter_inpt, unsigned & PRICE_LESS_THAN
 int main (int argc, char **argv)
 {
 	std::vector<Product> products, outp;
-	unsigned	PRICE_LESS_THAN;
+	long	PRICE_LESS_THAN;
 	tm			DATE_AFTER;
 	std::string	NAME_CONTAINS;
-	unsigned	PRICE_GREATER_THAN;
+	long	PRICE_GREATER_THAN;
 	tm			DATE_BEFORE;
 	std::string	prod_inpt, buf, outp_json;
 	std::vector<std::string> filter_inpt;
 
-	std::fstream fileToRead;
+	std::ifstream fileToRead;
 	fileToRead.open("input.txt");
 	if (fileToRead.is_open())
 	{
@@ -227,7 +244,7 @@ int main (int argc, char **argv)
 		}
 		else
 		{
-			std::fstream fileToRead;
+			std::ifstream fileToRead;
 			fileToRead.open(argv[1]);
 			if (!fileToRead.is_open())
 				exit (1);
@@ -277,11 +294,11 @@ int main (int argc, char **argv)
 	std::cout <<  "[";
 	for (std::vector<Product>::iterator iter = outp.begin(); iter < outp.end(); iter++)
 	{
-		std::cout <<  "{\"id\": " << int((*iter).id) << ", \"name\": \"" << (*iter).name << "\", \"price\": " << (*iter).price << ", \"date\": \"" << unsignedToString99((*iter).productDate.tm_mday) << "." << unsignedToString99((*iter).productDate.tm_mon) << "." << (*iter).productDate.tm_year << "\"}";
+		std::cout <<  "{\"id\": " << int((*iter).id) << ", \"name\": \"" << (*iter).name << "\", \"price\": " << (*iter).price << ", \"date\": \"" << longToString99((*iter).productDate.tm_mday) << "." << longToString99((*iter).productDate.tm_mon) << "." << (*iter).productDate.tm_year << "\"}";
 		if (iter + 1 != outp.end())
-			std::cout << ",";
+			std::cout << ", ";
 	}
-	std::cout << "]" << std::endl;
+	std::cout << "]\n";
 
 	return 0;
 }

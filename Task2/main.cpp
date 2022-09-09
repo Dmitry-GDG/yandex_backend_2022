@@ -7,15 +7,15 @@
 struct Disciplines
 {
 	std::string	disciplineName;
-	unsigned	maxQtyParticipants;
+	int	maxQtyParticipants;
 };
 
 struct Participants
 {
 	std::string	identifier;
 	std::string	disciplineName;
-	unsigned	numberOfTicks;
-	unsigned	penalty;
+	int	numberOfTicks;
+	long	penalty;
 };
 
 void tokenize(std::string const &str, const char delim,
@@ -24,7 +24,8 @@ void tokenize(std::string const &str, const char delim,
     size_t start;
     size_t end = 0;
  
-    while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
+    out.clear();
+	while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
     {
         end = str.find(delim, start);
         out.push_back(str.substr(start, end - start));
@@ -48,7 +49,8 @@ bool comp2(Participants a, Participants b)
 void fillData(std::vector<std::string> inpt_tmp, std::vector<Disciplines> & disciplines, std::vector<Participants> & participants, const char delim)
 {
 	std::vector<std::string> inpt;
-	int n, k;
+	int n;
+	long k;
 	std::string tmp;
 
 	n = stoi(inpt_tmp[0]);
@@ -64,8 +66,8 @@ void fillData(std::vector<std::string> inpt_tmp, std::vector<Disciplines> & disc
 		disciplines.push_back(disciplines_inpt);
 		iter++;
 	}
-	k = stoi(*iter);
-	for (int i = 0; i < k; i++)
+	k = stol(*iter);
+	for (long i = 0; i < k; i++)
 	{
 		iter++;
 		inpt.clear();
@@ -76,14 +78,15 @@ void fillData(std::vector<std::string> inpt_tmp, std::vector<Disciplines> & disc
 		participants_inpt.identifier = inpt[0];
 		participants_inpt.disciplineName = inpt[1];
 		participants_inpt.numberOfTicks = stoi(inpt[2]);
-		participants_inpt.penalty = stoi(inpt[3]);
+		participants_inpt.penalty = stol(inpt[3]);
 		participants.push_back(participants_inpt);
 	}
 }
 
 int main (int argc, char **argv)
 {
-	int n, k;
+	int n;
+	long k;
 	std::vector<Disciplines> disciplines;
 	std::vector<Participants> participants;
 	std::string tmp;
@@ -94,7 +97,7 @@ int main (int argc, char **argv)
 	std::vector<Disciplines>::iterator iterD;
 	std::vector<Participants>::iterator iterP;
 
-	std::fstream fileToRead;
+	std::ifstream fileToRead;
 	fileToRead.open("input.txt");
 	if (fileToRead.is_open())
 	{
@@ -117,7 +120,7 @@ int main (int argc, char **argv)
 		{
 			// std::cout << "number of disciplines = ";
 			std::cin >> n;
-			for (int i = 0; i < n; i++)
+			for (long i = 0; i < n; i++)
 			{
 				inpt.clear();
 				// std::cout << "discipline " << i + 1 << "\t= ";
@@ -131,7 +134,7 @@ int main (int argc, char **argv)
 
 			// std::cout << "number of participants = ";
 			std::cin >> k;
-			for (int i = 0; i < k; i++)
+			for (long i = 0; i < k; i++)
 			{
 				inpt.clear();
 				// std::cout << "participant " << i + 1 << "\t= ";
@@ -141,7 +144,7 @@ int main (int argc, char **argv)
 				participants_inpt.identifier = inpt[0];
 				participants_inpt.disciplineName = inpt[1];
 				participants_inpt.numberOfTicks = stoi(inpt[2]);
-				participants_inpt.penalty = stoi(inpt[3]);
+				participants_inpt.penalty = stol(inpt[3]);
 				participants.push_back(participants_inpt);
 			}
 		}
@@ -149,7 +152,7 @@ int main (int argc, char **argv)
 		{
 			std::string buf;
 			std::vector<std::string> inpt_tmp;
-			std::fstream fileToRead;
+			std::ifstream fileToRead;
 			fileToRead.open(argv[1]);
 			if (!fileToRead.is_open())
 				exit (1);
@@ -194,7 +197,7 @@ int main (int argc, char **argv)
 
 	// std::cout << "Output:" << std::endl;
 	for (std::vector<Participants>::iterator iter = outp.begin(); iter < outp.end(); iter++)
-		std::cout << (*iter).identifier << std::endl;
+		std::cout << (*iter).identifier << "\n";
 
 	return 0;
 }
