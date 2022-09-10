@@ -1,3 +1,5 @@
+https://contest.yandex.ru/contest/39665/finish/
+
 По возрастанию сложности 
 
 1, 5, 2, 3, 4
